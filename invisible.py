@@ -29,3 +29,21 @@ while(raw_video.isOpened()):
     lower_red2=np.array([155,40,40])
     upper_red2=np.array([180,255,255])
     mask2=cv2.inRange(hsv,lower_red2,upper_red2)
+    mask=mask1+mask2
+#removing noise from picture = removing small unwanted pixels from the picture, it makes the mask smoother and cleaner to detect specifick colors
+    mask=cv2.morphologyEx(mask,cv2.MORPH_OPEN,np.ones((3,3),np.uint8),iterations=2)
+    #cv2.morphologyEx is a functoin of cv2 which works on erosion, dilation, opening, closing
+    #cv2.MORPH_OPEN specifuculy works on opening =erosion + dilation
+    mask=cv2.dilate(mask,np.ones((3,3),np.uint8),iterations=1)
+    #dilation expands white regen in the mask filling the small gaps making the mask smoother
+    mask2=cv2.bitwise_not(mask)
+    #mask is the cloak area, mask2 is everything exept cloak 
+
+    cloak1=cv2.bitwise_and(bg,bg,mask=mask)
+    cloak2=cv2.bitwise_and(img,img,mask=mask2)
+    output=cv2.addWeighted(cloak1,1,cloak2,1,0)
+    #invisibility effect
+    cv2.imshow("invisible man", output)
+    key=cv2.waitKey(10)
+    if key== 27:
+        break
